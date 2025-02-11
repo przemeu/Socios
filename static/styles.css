@@ -1,0 +1,50 @@
+body {
+    background-color: #ffcc00;
+    color: #0033cc;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+input, select, button {
+    margin: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #0033cc;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #002299;
+}
+.result {
+    margin-top: 20px;
+}
+
+.result img {
+    width: 300px;
+    border-radius: 50%;
+    border: 3px solid #0033cc;
+}
+
+.download-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #0033cc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.download-btn:hover {
+    background-color: #002299;
+}
