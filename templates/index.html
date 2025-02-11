@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Przetwarzanie Obrazu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            color: #000;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #ffd700; /* Żółty */
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+        input, button {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #000;
+        }
+        button {
+            background-color: #0057b8; /* Niebieski */
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        img {
+            margin-top: 20px;
+            max-width: 100%;
+            border-radius: 50%; /* Okrągły podgląd */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Prześlij obraz i wybierz numer Socio</h2>
+        <form action="/" method="POST" enctype="multipart/form-data">
+            <label for="image">Wybierz obraz:</label>
+            <input type="file" name="image" id="image" accept="image/*" required><br>
+
+            <label for="number">Numer Socio:</label>
+            <input type="number" id="number" name="number" min="1" max="100" required><br>
+
+            <button type="submit">Przetwórz</button>
+        </form>
+
+        {% if processed_image %}
+            <h3>Przetworzony obraz:</h3>
+            <img src="{{ processed_image }}" alt="Przetworzony obraz">
+        {% endif %}
+    </div>
+
+</body>
+</html>
