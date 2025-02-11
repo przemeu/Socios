@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Przetwarzanie Obrazu</title>
+    <title>Twoja nakładka Socios</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             text-align: center;
-            color: #000;
+            color: #0057b8; /* Niebieski tekst */
         }
         .container {
             max-width: 500px;
@@ -39,6 +39,19 @@
             max-width: 100%;
             border-radius: 50%; /* Okrągły podgląd */
         }
+        .download-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #0057b8;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .download-btn:hover {
+            background-color: #004494;
+        }
     </style>
 </head>
 <body>
@@ -58,6 +71,9 @@
         {% if processed_image %}
             <h3>Przetworzony obraz:</h3>
             <img src="{{ processed_image }}" alt="Przetworzony obraz">
+            
+            <br>
+            <a href="{{ processed_image }}" download="processed_image.png" class="download-btn">Pobierz Obraz</a>
         {% endif %}
     </div>
 
