@@ -1,14 +1,17 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, redirect, url_for
 from PIL import Image, ImageDraw
 import io
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 OVERLAY_FOLDER = "overlays"
+OUTPUT_FOLDER = "static/processed"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OVERLAY_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 def crop_to_circle(image):
     """Kadruje obraz do okrągłego kształtu."""
@@ -48,6 +51,8 @@ def apply_overlay(image, number):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    processed_image_url = None
+
     if request.method == "POST":
         file = request.files["image"]
         number = request.form["number"]
@@ -57,14 +62,27 @@ def index():
             image = crop_to_circle(image)
             image = apply_overlay(image, number)
             
-            # Zapisanie do pamięci i wysłanie pliku
-            img_io = io.BytesIO()
-            image.save(img_io, format="PNG")
-            img_io.seek(0)
-            
-            return send_file(img_io, mimetype="image/png", as_attachment=True, download_name="output.png")
-            
-    return render_template("index.html")
+            # Zapisanie pliku z unikalną nazwą
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"output_{timestamp}.png"
+            output_path = os.path.join(OUTPUT_FOLDER, filename)
+            image.save(output_path, format="PNG")
+
+            # Ustawienie URL do wyświetlenia na stronie
+            processed_image_url = f"/{output_path}"
+
+            return render_template("index.html", processed_image=processed_image_url, download_filename=filename)
+
+    return render_template("index.html", processed_image=processed_image_url)
+
+@app.route('/download/<filename>')
+def download(filename):
+    file_path = os.path.join(OUTPUT_FOLDER, filename)
+    
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True, download_name=filename)
+    else:
+        return "File not found", 404
 
 if __name__ == "__main__":
     app.run(debug=True)
