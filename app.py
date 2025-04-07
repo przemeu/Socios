@@ -3,7 +3,6 @@ from PIL import Image, ImageDraw
 import io
 import os
 from datetime import datetime
-import numpy as np
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
@@ -27,29 +26,30 @@ def crop_to_circle(image):
     return circular_image
 
 def create_blue_gradient(width, height):
-    """Creates a horizontal gradient from light blue to dark blue with transparency."""
-    # Create a numpy array for the gradient
-    gradient = np.zeros((height, width, 4), dtype=np.uint8)
+    """Creates a horizontal gradient from light blue to dark blue with transparency using PIL only."""
+    # Create a new transparent image
+    gradient = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(gradient)
     
-    # Light blue RGB (left side)
-    light_blue = np.array([140, 180, 240])
-    # Dark blue RGB (right side)
-    dark_blue = np.array([20, 80, 180])
+    # Define the light and dark blue colors
+    light_blue = (140, 180, 240, 128)  # Light blue with 50% transparency
+    dark_blue = (20, 80, 180, 128)     # Dark blue with 50% transparency
     
-    # Create the horizontal gradient
+    # Draw vertical lines with gradually changing colors
     for x in range(width):
         # Calculate the ratio (0 to 1) based on position
-        ratio = x / (width - 1)
+        ratio = x / (width - 1) if width > 1 else 0
+        
         # Interpolate between light and dark blue
-        color = light_blue * (1 - ratio) + dark_blue * ratio
-        # Set the color for the entire column
-        gradient[:, x, 0:3] = color
-        # Set alpha to 128 (50% transparency) for all pixels
-        gradient[:, x, 3] = 128
+        r = int(light_blue[0] * (1 - ratio) + dark_blue[0] * ratio)
+        g = int(light_blue[1] * (1 - ratio) + dark_blue[1] * ratio)
+        b = int(light_blue[2] * (1 - ratio) + dark_blue[2] * ratio)
+        a = int(light_blue[3] * (1 - ratio) + dark_blue[3] * ratio)
+        
+        # Draw a vertical line with the calculated color
+        draw.line([(x, 0), (x, height)], fill=(r, g, b, a))
     
-    # Convert numpy array to PIL Image
-    gradient_img = Image.fromarray(gradient, 'RGBA')
-    return gradient_img
+    return gradient
 
 def process_image(image, number, add_blue_background=False, facebook_mode=False):
     """Przetwarza obraz z nakładką, opcjonalnym niebieskim podkładem, i opcją dla Facebooka."""
