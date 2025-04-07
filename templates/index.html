@@ -35,10 +35,14 @@
         button:hover {
             background-color: #004494;
         }
-        img {
+        img.circular {
             margin-top: 20px;
             max-width: 100%;
             border-radius: 50%; /* Okrągły podgląd */
+        }
+        img.rectangular {
+            margin-top: 20px;
+            max-width: 100%;
         }
         .download-btn {
             display: block;
@@ -69,6 +73,27 @@
             display: none;
             margin: 0 auto;
         }
+        .checkbox-container {
+            margin: 15px 0;
+            text-align: left;
+            padding-left: 20px;
+        }
+        .checkbox-container label {
+            display: inline-block;
+            margin-left: 5px;
+        }
+        .options-container {
+            border: 1px solid #0057b8;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .options-heading {
+            margin: 5px 0 10px;
+            text-align: center;
+            font-size: 16px;
+        }
     </style>
     <script>
         function previewImage(event) {
@@ -77,8 +102,32 @@
                 const preview = document.getElementById('image-preview');
                 preview.src = reader.result;
                 preview.style.display = 'block';
+                
+                // Update preview style based on Facebook checkbox
+                const facebookMode = document.getElementById('facebook').checked;
+                if (facebookMode) {
+                    preview.classList.remove('circular');
+                    preview.classList.add('rectangular');
+                } else {
+                    preview.classList.remove('rectangular');
+                    preview.classList.add('circular');
+                }
             }
             reader.readAsDataURL(event.target.files[0]);
+        }
+        
+        function updatePreviewStyle() {
+            const preview = document.getElementById('image-preview');
+            if (preview.src) {
+                const facebookMode = document.getElementById('facebook').checked;
+                if (facebookMode) {
+                    preview.classList.remove('circular');
+                    preview.classList.add('rectangular');
+                } else {
+                    preview.classList.remove('rectangular');
+                    preview.classList.add('circular');
+                }
+            }
         }
     </script>
 </head>
@@ -98,18 +147,32 @@
             <input type="file" name="image" id="image" accept="image/*" required onchange="previewImage(event)"><br>
             
             <div class="preview-container">
-                <img id="image-preview" src="#" alt="Podgląd">
+                <img id="image-preview" src="#" alt="Podgląd" class="circular">
             </div>
             
             <label for="number">Numer Socio:</label>
             <input type="number" id="number" name="number" min="1" max="999" required><br>
+            
+            <div class="options-container">
+                <div class="options-heading">Opcje</div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="blue_background" name="blue_background" {% if blue_background_checked %}checked{% endif %}>
+                    <label for="blue_background">Dodaj niebieski podkład pod nakładkę</label>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="facebook" name="facebook" {% if facebook_checked %}checked{% endif %} onchange="updatePreviewStyle()">
+                    <label for="facebook">Facebook (nie przycinaj do koła)</label>
+                </div>
+            </div>
 
             <button type="submit">Przetwórz</button>
         </form>
 
         {% if processed_image %}
             <h3>Przetworzony obraz:</h3>
-            <img src="{{ processed_image }}" alt="Przetworzony obraz">
+            <img src="{{ processed_image }}" alt="Przetworzony obraz" class="{% if facebook_checked %}rectangular{% else %}circular{% endif %}">
             
             <br>
             <a href="{{ url_for('download', filename=download_filename) }}" class="download-btn">Pobierz Obraz</a>
