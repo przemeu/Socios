@@ -45,6 +45,8 @@ def process_image(image, number, add_blue_background=False, facebook_mode=False)
         # Create a semi-transparent blue layer for the lower part of the image
         width, height = processed_image.width, processed_image.height
         blue_bg_height = int(height * 0.3)
+        
+        # Create a semi-transparent blue overlay
         blue_bg = Image.new("RGBA", (width, blue_bg_height), (100, 150, 230, 128))  # Lighter blue with 50% transparency
         
         # Position the blue background at the bottom 30% of the image
@@ -56,9 +58,13 @@ def process_image(image, number, add_blue_background=False, facebook_mode=False)
             mask = Image.new("L", (width, blue_bg_height), 255)
         else:
             # For circle mode, use a mask that matches the bottom of the circle
-            mask = Image.new("L", (width, blue_bg_height), 0)
-            draw = ImageDraw.Draw(mask)
-            draw.rectangle((0, 0, width, blue_bg_height), fill=255)
+            # Create a circular mask for the entire image
+            full_mask = Image.new("L", (width, height), 0)
+            draw = ImageDraw.Draw(full_mask)
+            draw.ellipse((0, 0, width, height), fill=255)
+            
+            # Extract the bottom portion of the mask
+            mask = full_mask.crop((0, y_offset, width, height))
         
         # Paste blue background
         processed_image.paste(blue_bg, (0, y_offset), mask)
@@ -168,3 +174,4 @@ def download(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
