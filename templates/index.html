@@ -3,53 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twoja nakładka Socios</title>
+    <title>Socios Overlay</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script>
-        function previewImage(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const preview = document.getElementById('image-preview');
-                preview.src = reader.result;
-                preview.style.display = 'block';
-            }
-            reader.readAsDataURL(event.target.files[0]);
+    <style>
+        body {
+            background: linear-gradient(to right, #0044cc, #0066ff);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
-    </script>
+        .container {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            text-align: left;
+        }
+        input[type="file"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: none;
+        }
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        button {
+            background-color: #ffcc00;
+            color: black;
+            padding: 12px 25px;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #ffd633;
+        }
+        .download-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #00cc66;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+        }
+        .download-button:hover {
+            background-color: #00e673;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+        .error {
+            background-color: #ff4d4d;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-
     <div class="container">
-        <h2>Prześlij obraz i wybierz numer Socio</h2>
-        <h4>Twoje zdjęcie powinno być kwadratowe</h4>
-        <h4>Zostanie wykadrowane do środka obrazu</h4>
-        
+        <h1>Generator zdjęć Socios</h1>
         {% if error %}
-            <div class="error-message">{{ error }}</div>
+            <p class="error">{{ error }}</p>
         {% endif %}
-        
-        <form action="/" method="POST" enctype="multipart/form-data">
-            <label for="image">Wybierz obraz:</label>
-            <input type="file" name="image" id="image" accept="image/*" required onchange="previewImage(event)"><br>
-            
-            <div class="preview-container">
-                <img id="image-preview" src="#" alt="Podgląd">
-            </div>
-            
-            <label for="number">Numer Socio:</label>
-            <input type="number" id="number" name="number" min="1" max="999" required><br>
+        <form method="post" enctype="multipart/form-data">
+            <label for="image">Wybierz zdjęcie:</label>
+            <input type="file" name="image" id="image" accept="image/*" required>
 
-            <button type="submit">Przetwórz</button>
+            <label for="number">Numer Socio (1-999):</label>
+            <input type="number" name="number" id="number" min="1" max="999" required>
+
+            <label>
+                <input type="checkbox" name="facebook">
+                Wersja do Facebooka (bez wycinania w kółko)
+            </label>
+
+            <label>
+                <input type="checkbox" name="blue_background">
+                Dodaj niebieskie tło (50% przezroczystości)
+            </label>
+
+            <button type="submit">Przetwórz zdjęcie</button>
         </form>
 
         {% if processed_image %}
-            <h3>Przetworzony obraz:</h3>
-            <img src="{{ processed_image }}" alt="Przetworzony obraz">
-            
-            <br>
-            <a href="{{ url_for('download', filename=download_filename) }}" class="download-btn">Pobierz Obraz</a>
+            <div class="result">
+                <h2>Gotowe zdjęcie:</h2>
+                <img src="{{ processed_image }}" alt="Gotowy obraz">
+                <a class="download-button" href="{{ url_for('download', filename=download_filename) }}">Pobierz</a>
+            </div>
         {% endif %}
     </div>
-
 </body>
 </html>
