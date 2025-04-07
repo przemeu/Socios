@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw
 import io
 import os
 from datetime import datetime
+import numpy as np
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
@@ -25,6 +26,31 @@ def crop_to_circle(image):
     
     return circular_image
 
+def create_blue_gradient(width, height):
+    """Creates a horizontal gradient from light blue to dark blue with transparency."""
+    # Create a numpy array for the gradient
+    gradient = np.zeros((height, width, 4), dtype=np.uint8)
+    
+    # Light blue RGB (left side)
+    light_blue = np.array([140, 180, 240])
+    # Dark blue RGB (right side)
+    dark_blue = np.array([20, 80, 180])
+    
+    # Create the horizontal gradient
+    for x in range(width):
+        # Calculate the ratio (0 to 1) based on position
+        ratio = x / (width - 1)
+        # Interpolate between light and dark blue
+        color = light_blue * (1 - ratio) + dark_blue * ratio
+        # Set the color for the entire column
+        gradient[:, x, 0:3] = color
+        # Set alpha to 128 (50% transparency) for all pixels
+        gradient[:, x, 3] = 128
+    
+    # Convert numpy array to PIL Image
+    gradient_img = Image.fromarray(gradient, 'RGBA')
+    return gradient_img
+
 def process_image(image, number, add_blue_background=False, facebook_mode=False):
     """Przetwarza obraz z nakładką, opcjonalnym niebieskim podkładem, i opcją dla Facebooka."""
     # Ensure image is square by cropping to smallest dimension
@@ -46,28 +72,45 @@ def process_image(image, number, add_blue_background=False, facebook_mode=False)
         width, height = processed_image.width, processed_image.height
         blue_bg_height = int(height * 0.3)
         
-        # Create a semi-transparent blue overlay
-        blue_bg = Image.new("RGBA", (width, blue_bg_height), (100, 150, 230, 128))  # Lighter blue with 50% transparency
+        # Create a blue gradient background with transparency
+        blue_bg = create_blue_gradient(width, blue_bg_height)
         
         # Position the blue background at the bottom 30% of the image
         y_offset = height - blue_bg_height
         
-        # Create a mask for the blue layer
-        if facebook_mode:
-            # For Facebook, use a rectangular mask
-            mask = Image.new("L", (width, blue_bg_height), 255)
-        else:
-            # For circle mode, use a mask that matches the bottom of the circle
+        # Extract the bottom portion of the original image
+        bottom_portion = processed_image.crop((0, y_offset, width, height))
+        
+        # Create a new image to blend the bottom portion with the blue background
+        blended = Image.new("RGBA", (width, blue_bg_height))
+        
+        # Paste the original bottom portion
+        blended.paste(bottom_portion, (0, 0))
+        
+        # Alpha composite the blue background over it
+        blended = Image.alpha_composite(blended, blue_bg)
+        
+        if not facebook_mode:
+            # For circle mode, we need to apply the circular mask to the blended result
             # Create a circular mask for the entire image
             full_mask = Image.new("L", (width, height), 0)
             draw = ImageDraw.Draw(full_mask)
             draw.ellipse((0, 0, width, height), fill=255)
             
             # Extract the bottom portion of the mask
-            mask = full_mask.crop((0, y_offset, width, height))
+            circle_mask = full_mask.crop((0, y_offset, width, height))
+            
+            # Create a transparent image the size of the bottom portion
+            masked_blend = Image.new("RGBA", (width, blue_bg_height), (0, 0, 0, 0))
+            
+            # Paste the blended result using the circle mask
+            masked_blend.paste(blended, (0, 0), circle_mask)
+            
+            # Use the masked blend
+            blended = masked_blend
         
-        # Paste blue background
-        processed_image.paste(blue_bg, (0, y_offset), mask)
+        # Paste the blended result back onto the original image
+        processed_image.paste(blended, (0, y_offset))
     
     # Now apply the overlay with number
     overlay_path = os.path.join(OVERLAY_FOLDER, f"{number}.png")
