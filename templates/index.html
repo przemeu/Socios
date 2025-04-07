@@ -5,96 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twoja nakładka Socios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            color: #0057b8; /* Niebieski tekst */
-        }
-        .container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #ffd700; /* Żółty */
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
-        input, button {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #000;
-        }
-        button {
-            background-color: #0057b8; /* Niebieski */
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #004494;
-        }
-        img.circular {
-            margin-top: 20px;
-            max-width: 100%;
-            border-radius: 50%; /* Okrągły podgląd */
-        }
-        img.rectangular {
-            margin-top: 20px;
-            max-width: 100%;
-        }
-        .download-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #0057b8;
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .download-btn:hover {
-            background-color: #004494;
-        }
-        .error-message {
-            color: #d9534f;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .preview-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        #image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 50%;
-            display: none;
-            margin: 0 auto;
-        }
-        .checkbox-container {
-            margin: 15px 0;
-            text-align: left;
-            padding-left: 20px;
-        }
-        .checkbox-container label {
-            display: inline-block;
-            margin-left: 5px;
-        }
-        .options-container {
-            border: 1px solid #0057b8;
-            border-radius: 5px;
-            padding: 10px;
-            margin-top: 15px;
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-        .options-heading {
-            margin: 5px 0 10px;
-            text-align: center;
-            font-size: 16px;
-        }
-    </style>
     <script>
         function previewImage(event) {
             const reader = new FileReader();
@@ -102,32 +12,8 @@
                 const preview = document.getElementById('image-preview');
                 preview.src = reader.result;
                 preview.style.display = 'block';
-                
-                // Update preview style based on Facebook checkbox
-                const facebookMode = document.getElementById('facebook').checked;
-                if (facebookMode) {
-                    preview.classList.remove('circular');
-                    preview.classList.add('rectangular');
-                } else {
-                    preview.classList.remove('rectangular');
-                    preview.classList.add('circular');
-                }
             }
             reader.readAsDataURL(event.target.files[0]);
-        }
-        
-        function updatePreviewStyle() {
-            const preview = document.getElementById('image-preview');
-            if (preview.src) {
-                const facebookMode = document.getElementById('facebook').checked;
-                if (facebookMode) {
-                    preview.classList.remove('circular');
-                    preview.classList.add('rectangular');
-                } else {
-                    preview.classList.remove('rectangular');
-                    preview.classList.add('circular');
-                }
-            }
         }
     </script>
 </head>
@@ -147,32 +33,18 @@
             <input type="file" name="image" id="image" accept="image/*" required onchange="previewImage(event)"><br>
             
             <div class="preview-container">
-                <img id="image-preview" src="#" alt="Podgląd" class="circular">
+                <img id="image-preview" src="#" alt="Podgląd">
             </div>
             
             <label for="number">Numer Socio:</label>
             <input type="number" id="number" name="number" min="1" max="999" required><br>
-            
-            <div class="options-container">
-                <div class="options-heading">Opcje</div>
-                
-                <div class="checkbox-container">
-                    <input type="checkbox" id="blue_background" name="blue_background" {% if blue_background_checked %}checked{% endif %}>
-                    <label for="blue_background">Dodaj niebieski podkład pod nakładkę</label>
-                </div>
-                
-                <div class="checkbox-container">
-                    <input type="checkbox" id="facebook" name="facebook" {% if facebook_checked %}checked{% endif %} onchange="updatePreviewStyle()">
-                    <label for="facebook">Facebook (nie przycinaj do koła)</label>
-                </div>
-            </div>
 
             <button type="submit">Przetwórz</button>
         </form>
 
         {% if processed_image %}
             <h3>Przetworzony obraz:</h3>
-            <img src="{{ processed_image }}" alt="Przetworzony obraz" class="{% if facebook_checked %}rectangular{% else %}circular{% endif %}">
+            <img src="{{ processed_image }}" alt="Przetworzony obraz">
             
             <br>
             <a href="{{ url_for('download', filename=download_filename) }}" class="download-btn">Pobierz Obraz</a>
